@@ -36,14 +36,14 @@ class Lecturer(Mentor):
     def average_grade(self):
         """Функция для вычисления среднего значения"""
         all_grades = []
-        for _, course_grades in self.lec_reviews: 
-            all_grades.append(course_grades)  
-        if not all_grades:  
+        for _, grades in self.lec_reviews:
+            all_grades.append(grades)
+        if not all_grades:
             return 0
         return sum(all_grades) / len(all_grades)
     
     def __add__(self, lecturer):
-        return f"{lecturer1.name} имеет оценку ({lecturer1.average_grade():.2f}), а {lecturer2.name} имеет оценку ({lecturer2.average_grade():.2f})\n"
+        return f"{self.name} имеет оценку ({self.average_grade():.2f}), а {lecturer.name} имеет оценку ({lecturer.average_grade():.2f})\n"
 
     def __str__(self):
         return (f'Имя: {self.name}\n'
@@ -85,7 +85,7 @@ class Student:
         return sum(all_grades) / len(all_grades)
                 
     def __add__(self, student):
-        return f"{student1.name} имеет оценку ({student1.average_grade():.2f}), а {student2.name} имеет оценку ({student2.average_grade():.2f})\n"
+        return f"{self.name} имеет оценку ({self.average_grade():.2f}), а {student.name} имеет оценку ({student.average_grade():.2f})\n"
 
     def __str__(self):
         return (f'Имя: {self.name}\n'
@@ -94,6 +94,29 @@ class Student:
                 f'Курсы в процессе изучения: {", ".join(self.courses_in_progress)} \n'
                 f'Завершенные курсы: {", ".join(self.finished_courses)}\n')
 
+
+def average_grade_students(students, course):
+    """Функция для вычисления средней оценки за домашние задания по всем студентам в рамках конкретного курса"""
+    all_grades = []
+    for student in students:
+        if course in student.grades:
+            for _, grade in student.grades[course]:
+                all_grades.append(grade)
+    if not all_grades:  # Проверка на случай, если оценок нет
+        return 0
+    return sum(all_grades) / len(all_grades)
+
+def average_grade_lecturers(lecturers, course):
+    """Функция для вычисления средней оценки за лекции всех лекторов в рамках курса"""
+    all_grades = []
+    for lecturer in lecturers:
+        if course in lecturer.courses:
+            for _, course_grades in lecturer.lec_reviews:
+                all_grades.append(course_grades)
+    if not all_grades:  # Проверка на случай, если оценок нет
+        return 0
+    return sum(all_grades) / len(all_grades)                
+    
 
 
 reviewer2 = Reviewer("Андрей", "Петров", "Git ")
@@ -107,24 +130,54 @@ student2 = Student("Иван", "Кузьмин", "Git")
 student2.finished_courses = ["Java", "BI"]
 student2.courses_in_progress = ["Python", "Git"]
 
+student3 = Student("Магомет", "Ибрагимов", "Git")
+student3.finished_courses = ["Java", "BI"]
+student3.courses_in_progress = ["Python", "Git"]
+
+student4 = Student("Даниил", "Иванов", "Python")
+student4.finished_courses = ["Git"]
+student4.courses_in_progress = ["Python", "Quality Control Specialist"]
+
+
+
 lecturer1 = Lecturer("Дмитрий", "Ветров", "Python")
 lecturer2 = Lecturer("Анатолий", "Муромов", "Git")
+lecturer3 = Lecturer("Егор", "Медваедев", "Python")
+lecturer4 = Lecturer("Мануфий", "Абрамов", "Git")
 
 reviewer1.give_review(student1, [5, 9, 10, 6, 5])
 reviewer2.give_review(student2, [4, 3, 9, 10])
+reviewer1.give_review(student3, [7, 10, 10, 8, 6])
+reviewer2.give_review(student4, [7, 5, 6, 6, 4, 10])
 
 student1.give_grades_to_lecturer(lecturer1, [8, 5, 5, 9])
 student2.give_grades_to_lecturer(lecturer2, [7, 9, 6, 7])
+student4.give_grades_to_lecturer(lecturer3, [10, 8, 7, 7, 9])
+student3.give_grades_to_lecturer(lecturer4, [9, 7, 7, 10, 7])
 
 print("Рецензенты:\n")
 print(reviewer1)
 print(reviewer2)
+
 print("Студенты:\n")
 print(student1)
 print(student2)
-print(student1.__add__(student2))
+print(student3)
+print(student4)
+print(student1.__add__(student3))
+print(student4.__add__(student2))
+
 print("Лекторы:\n")
 print(lecturer1)
 print(lecturer2)
-print(lecturer1.__add__(lecturer2))
+print(lecturer3)
+print(lecturer4)
+print(lecturer3.__add__(lecturer2))
+print(lecturer4.__add__(lecturer1))
 
+print(f'Средняя оценка за домашние задания по курсу "Python": {average_grade_students([student1, student3], "Python"):.2f}')
+print(f'Средняя оценка за домашние задания по курсу "Git": {average_grade_students([student2, student4], "Git"):.2f}')
+
+
+print(f'Средняя оценка за лекции курса "Python": {average_grade_lecturers([lecturer1, lecturer3], "Python"):.2f}')
+print(f'Средняя оценка за лекции курса "Git": {average_grade_lecturers([lecturer2, lecturer4], "Git"):.2f}')
